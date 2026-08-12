@@ -1,12 +1,12 @@
 import crypto from "crypto";
 import cookieParser from "cookie-parser";
-import { globalErrorHandler } from "./src/middleware/globalErrorHandler.js";
-import { notFoundHandler } from "./src/middleware/notFoundHandler.js";
-import authRouter from "./src/modules/admin/auth/auth.router.js";
-import categoryRouter from "./src/modules/admin/category/category.router.js"
-import productRouter from "./src/modules/admin/product/product.router.js"
+import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
+import authRouter from "./modules/admin/auth/auth.router.js";
+import categoryRouter from "./modules/admin/category/category.router.js"
+import productRouter from "./modules/admin/product/product.router.js"
 import cors from "cors";
-import {corsOptions} from "./src/utils/corsOptions.js";
+import {corsOptions} from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
     // Middleware to parse JSON requests
  app.use(express.json());
