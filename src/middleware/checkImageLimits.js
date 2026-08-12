@@ -1,4 +1,4 @@
-import { catchError } from "../Utils/catchError.js";
+import { catchError } from "../utils/catchError.js";
 import { Products } from "../../DB/models/admin/product.model.js";
 
 export const checkProductAndImageLimit = catchError(async (req, res, next) => {

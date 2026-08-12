@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import cloudinary from "../utils/cloudinary.config.js";
-import { catchError } from "../Utils/catchError.js";
+import { catchError } from "../utils/catchError.js";
 
 // function upload images after processing to cloudinary
 const uploadStreamToCloudinary = (
