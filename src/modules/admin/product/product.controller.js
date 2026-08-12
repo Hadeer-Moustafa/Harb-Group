@@ -1,4 +1,4 @@
-import { catchError } from "../../../Utils/catchError.js";
+import { catchError } from "../../../utils/catchError.js";
 import { Products } from "../../../../DB/models/admin/product.model.js";
 import { Category } from "../../../../DB/models/admin/category.model.js";
 import { sendSuccess } from "../../../utils/successResponse.js";
