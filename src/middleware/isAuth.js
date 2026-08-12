@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { catchError } from "../Utils/catchError.js";
+import { catchError } from "../utils/catchError.js";
 import { AdminUser } from "../../DB/models/admin/admin.model.js";
 
 export const isAuthenticated = catchError(async (req, res, next) => {
