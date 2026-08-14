@@ -2,8 +2,13 @@ import multer from "multer";
 
 const memoryStorage = multer.memoryStorage();
 
-const imageFilter = (req,file,cb) => {
-    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const imageFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+  ];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -16,13 +21,14 @@ const imageFilter = (req,file,cb) => {
           code: "VALIDATION_ERROR",
           message: "Invalid image type",
           field: file.fieldname,
-          details: "image format is invalid. Only JPEG, PNG, and WEBP are allowed."
-        }
-      ]
+          details:
+            "image format is invalid. Only JPEG, PNG, and WEBP are allowed.",
+        },
+      ],
     };
     cb(customError, false);
-}
-}
+  }
+};
 
 export const uploadImages = multer({
   storage: memoryStorage,
@@ -32,8 +38,8 @@ export const uploadImages = multer({
   },
 });
 
-const fileFilter = (req,file,cb) => {
-    const allowedMimeType = 'application/pdf';
+const fileFilter = (req, file, cb) => {
+  const allowedMimeType = "application/pdf";
 
   if (file.mimetype === allowedMimeType) {
     cb(null, true);
@@ -46,13 +52,13 @@ const fileFilter = (req,file,cb) => {
           code: "VALIDATION_ERROR",
           message: "Invalid file type",
           field: file.fieldname,
-          details: "File format is invalid. Only pdf are allowed."
-        }
-      ]
+          details: "File format is invalid. Only pdf are allowed.",
+        },
+      ],
     };
     cb(customError, false);
-}
-}
+  }
+};
 
 export const uploadFile = multer({
   storage: memoryStorage,
@@ -61,10 +67,16 @@ export const uploadFile = multer({
     fileSize: 10 * 1024 * 1024, // 10MB
   },
 });
-// handel multer errors for images
-export const uploadImagesArray = (fieldName = "images", maxCount = 10) => {
+// handel multer errors for images (array)
+export const uploadImagesArray = (
+  fieldName = "images",
+  maxCount = 10,
+  isSingle = false,
+) => {
   return (req, res, next) => {
-    const upload = uploadImages.array(fieldName, maxCount);
+    const upload = isSingle
+      ? uploadImages.single(fieldName)
+      : uploadImages.array(fieldName, maxCount);
 
     upload(req, res, (err) => {
       if (err) {
@@ -76,14 +88,18 @@ export const uploadImagesArray = (fieldName = "images", maxCount = 10) => {
             errors: [
               {
                 code: "TOO_MANY_FILES",
-                message: `You cannot upload more than ${maxCount} files at once`,
+                message: isSingle
+                  ? `Only 1 file is allowed for field '${fieldName}'`
+                  : `You cannot upload more than ${maxCount} files at once`,
                 field: fieldName,
-                details: `The field '${fieldName}' exceeded the maximum allowed limit of ${maxCount} files.`,
+                etails: isSingle
+                  ? `The field '${fieldName}' accepts only a single image file.`
+                  : `The field '${fieldName}' exceeded the maximum allowed limit of ${maxCount} files.`,
               },
             ],
           });
         }
-// if image file size exceed 10M
+        // if image file size exceed 10M
         if (err.code === "LIMIT_FILE_SIZE") {
           return next({
             statusCode: 400,
@@ -122,12 +138,13 @@ export const uploadSingleFile = (fieldName = "file") => {
                 code: "FILE_TOO_LARGE",
                 message: "File size exceeds 10 MB limit",
                 field: fieldName,
-                details: "Please ensure the PDF file size is smaller than 10 MB.",
+                details:
+                  "Please ensure the PDF file size is smaller than 10 MB.",
               },
             ],
           });
         }
-if (err.code === "LIMIT_UNEXPECTED_FILE") {
+        if (err.code === "LIMIT_UNEXPECTED_FILE") {
           return next({
             statusCode: 400,
             message: "Operation failed",

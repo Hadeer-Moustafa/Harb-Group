@@ -102,7 +102,13 @@ export const updateCategory = catchError(async (req, res, next) => {
   }
   const newCategory = await Category.findByIdAndUpdate(
     categoryID,
-    { nameAr, nameEn, descriptionAr, descriptionEn, displayOrder },
+    {
+      nameAr: nameAr ?? category.nameAr,
+      nameEn: nameEn ?? category.nameEn,
+      descriptionAr: descriptionAr ?? category.descriptionAr,
+      descriptionEn: descriptionEn ?? category.descriptionEn,
+      displayOrder,
+    },
     { returnDocument: "after" },
   );
   return sendSuccess(res, 200, "Category updated successfully", newCategory);
