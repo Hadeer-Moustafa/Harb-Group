@@ -150,5 +150,5 @@ export const deleteCategory = catchError(async (req, res, next) => {
   }
   category.isActive = false;
   await category.save();
-  return sendSuccess(res, 204);
+  return res.status(204).send();
 });

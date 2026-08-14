@@ -1,7 +1,7 @@
 import { catchError } from "../../../utils/catchError.js";
 import { Services } from "../../../../DB/models/admin/service.model.js";
 import { sendSuccess } from "../../../utils/successResponse.js";
-
+import {v2 as cloudinary} from "cloudinary"
 export const createService = catchError(async (req, res, next) => {
   const { nameAr, nameEn, descriptionAr, descriptionEn } = req.body;
   let displayOrder = req.body.displayOrder;
@@ -138,14 +138,33 @@ export const deleteService = catchError(async (req, res, next) => {
       ],
     });
   }
-  if (service.image?.public_id) {
-    await cloudinary.uploader.destroy(service.image.public_id, {
-      resource_type: "image",
-      invalidate: true,
-    });
+
+     const folderPath = `services/${serviceId}`;
+  
+   try {
+    const subFolders = await cloudinary.api.sub_folders("services");
+    const isFolderExist = subFolders.folders.some(
+      (folder) => folder.name === serviceId
+    );
+
+    if (isFolderExist) {
+      await cloudinary.api.delete_resources_by_prefix(folderPath);
+      await cloudinary.api.delete_folder(folderPath);
+
+      console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
+    } else {
+      console.log(`Folder ${folderPath} does not exist on Cloudinary, skipping delete.`);
+    }
+  } catch (error) {
+    if (error.error?.http_code === 404 || error.http_code === 404) {
+      console.log("Parent or target folder not found on Cloudinary");
+    } else {
+      console.error("Cloudinary Folder Delete Error:", error);
+    }
   }
+  
   await Services.findByIdAndDelete(serviceId);
-  return sendSuccess(res, 204);
+   return res.status(204).send();
 });
 
 export const upload_updateServiceImage = catchError(async (req, res, next) => {
@@ -185,3 +204,42 @@ export const upload_updateServiceImage = catchError(async (req, res, next) => {
     service.image,
   );
 });
+
+export const deleteServiceImage = catchError (async (req , res, next) => {
+    const { serviceId } = req.params;
+  const service = await Services.findById(serviceId);
+  if (!service) {
+    return next({
+      statusCode: 404,
+      message: "Service not found",
+      errors: [
+        {
+          code: "NOT_FOUND",
+          message: "Service does not exist",
+          field: "serviceId",
+          details: "Service with this ID does not exist",
+        },
+      ],
+    });
+  }
+  if(!service.image?.public_id) {
+      return next({
+      statusCode: 404,
+      message: "image not found",
+      errors: [
+        {
+          code: "NOT_FOUND",
+          message: "image not found",
+          details: "Service with this ID does not have image",
+        },
+      ],
+    });
+  }
+  await cloudinary.uploader.destroy(service.image.public_id, {
+        resource_type: "image",
+        invalidate: true,
+      });
+      service.image = undefined;
+      await service.save();
+      return res.status(204).send();
+})

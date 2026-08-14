@@ -10,6 +10,8 @@ import {
   createService,
   updateService,
   deleteService,
+  upload_updateServiceImage,
+  deleteServiceImage,
 } from "./service.controller.js";
 import { uploadImagesArray } from "../../../middleware/multer.js";
 import { processAndUpload } from "../../../middleware/imageProcessing+upload.js";
@@ -38,10 +40,18 @@ router.delete(
 );
 // upload service image
 router.post(
-  "/:serviceId/images",
+  "/:serviceId/image",
   isAuthenticated,
   validate(serviceIdValSchema),
   uploadImagesArray("image", 1, true),
   processAndUpload({ folder: "services" }),
+  upload_updateServiceImage,
+);
+// delete service image
+router.delete(
+  "/:serviceId/image",
+  isAuthenticated,
+  validate(serviceIdValSchema),
+  deleteServiceImage,
 );
 export default router;

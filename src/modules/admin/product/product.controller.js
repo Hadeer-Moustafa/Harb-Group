@@ -282,7 +282,7 @@ export const deleteProduct = catchError(async (req, res, next) => {
     console.error("Cloudinary Folder Delete Error:", error);
   }
   await product.deleteOne();
-  return sendSuccess(res, 204);
+  return res.status(204).send();
 });
 
 export const uploadProductImages = catchError(async (req, res, next) => {
@@ -342,7 +342,7 @@ export const deleteProductImage = catchError(async (req, res, next) => {
     img.displayOrder = index + 1;
   });
   await product.save();
-  return sendSuccess(res, 204);
+  return res.status(204).send();
 });
 
 export const uploadProductFile = catchError(async (req, res, next) => {
@@ -388,5 +388,5 @@ export const deleteProductFile = catchError(async (req, res, next) => {
   });
   product.productPdf = undefined;
   await product.save();
-  return sendSuccess(res, 204);
+  return res.status(204).send();
 });

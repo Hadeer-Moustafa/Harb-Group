@@ -47,6 +47,9 @@ export const createServiceValSchema = Joi.object({
     "number.integer": "display order must be integer number",
     "number.positive": "display order must be positive number",
   }),
+  isActive : Joi.boolean().optional().messages({
+    "boolean.base":"isActive must be true or false"
+  })
 });
 
 export const serviceIdValSchema = Joi.object({
@@ -100,4 +103,7 @@ export const updateServiceValSchema = Joi.object({
     "number.positive": "display order must be positive number",
   }),
   serviceId: idRule,
+  isActive : Joi.boolean().optional().messages({
+    "boolean.base":"isActive must be true or false"
+  })
 });
