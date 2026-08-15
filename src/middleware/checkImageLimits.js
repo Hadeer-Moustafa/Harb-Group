@@ -1,23 +1,30 @@
 import { catchError } from "../utils/catchError.js";
 import { Products } from "../../DB/models/admin/product.model.js";
 
-export const checkProductAndImageLimit = catchError(async (req, res, next) => {
+export const checkDocAndImageLimit = ({
+  model,
+  resourceName = 'document',
+  paramName = null,
+  maxImages = 20,
+  imageField = 'images',
+}) => {
+return catchError(async (req, res, next) => {
   // 1. Extract product ID from path parameters
-  const productId = req.params.productId || req.params.id;
+  const DocId = req.params[paramName] || req.params.id;
 
   // 2. Fetch the product from the database
-  const product = await Products.findById(productId);
+  const document = await model.findById(DocId);
 
   // Return 404 if the product does not exist
-  if (!product) {
+  if (!document) {
     return next({
       statusCode: 404,
-      message: "Product not found",
+      message: `${resourceName} not found`,
       errors: [
         {
           code: "NOT_FOUND",
-          message: "Product not found",
-          details: `No product found with ID: ${productId}`,
+          message: `${resourceName} not found` ,
+          details: `No ${resourceName} found with ID: ${DocId}`,
         },
       ],
     });
@@ -27,14 +34,14 @@ export const checkProductAndImageLimit = catchError(async (req, res, next) => {
     const incomingFilesCount = req.files ? req.files.length : 0;
 
     // 4. Get current images count stored in the database
-    const currentImagesCount = product.images ? product.images.length : 0;
+    const currentImagesCount = document[imageField] ? document[imageField].length : 0;
 
     // 5. Calculate total combined image count
     const totalAfterUpload = currentImagesCount + incomingFilesCount;
 
     // 6. Validate total image count against the max limit (20 images)
-    if (totalAfterUpload > 20) {
-      const remainingAllowed = 20 - currentImagesCount;
+    if (totalAfterUpload > maxImages) {
+      const remainingAllowed = maxImages - currentImagesCount;
 
       return next({
         statusCode: 400,
@@ -42,16 +49,18 @@ export const checkProductAndImageLimit = catchError(async (req, res, next) => {
         errors: [
           {
             code: "LIMIT_EXCEEDED",
-            message: "Product images limit exceeded",
+            message: `${resourceName} images limit exceeded`,
             field: "images",
-            details: `Product currently has ${currentImagesCount} images. You can only add up to ${remainingAllowed} more image(s) to reach the maximum limit of 20.`,
+            details: `${resourceName} currently has ${currentImagesCount} images. You can only add up to ${remainingAllowed} more image(s) to reach the maximum limit of ${maxImages}.`,
           },
         ],
       });
     }
   }
   // 7. Attach fetched product to request object for controller reuse
-  req.product = product;
+  req[resourceName] = document;
   // Proceed to the next middleware (processAndUpload)
   return next();
 });
+}
+

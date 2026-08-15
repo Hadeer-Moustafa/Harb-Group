@@ -16,13 +16,14 @@ import {
   deleteProductFile,
   deleteProductImage,
 } from "./product.controller.js";
+import { Products } from "../../../../DB/models/admin/product.model.js";
 import { IDvalidationSchema } from "../category/category.validation.js";
 import {
   uploadImagesArray,
   uploadSingleFile,
 } from "../../../middleware/multer.js";
 import { processAndUpload } from "../../../middleware/imageProcessing+upload.js";
-import { checkProductAndImageLimit } from "../../../middleware/checkImageLimits.js";
+import { checkDocAndImageLimit } from "../../../middleware/checkImageLimits.js";
 
 const router = Router();
 
@@ -40,7 +41,7 @@ router.delete(
   "/:productId",
   isAuthenticated,
   validate(productIdValSchema),
-  checkProductAndImageLimit,
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
   deleteProduct,
 );
 //upload images of products
@@ -49,7 +50,7 @@ router.post(
   isAuthenticated,
   validate(productIdValSchema),
   uploadImagesArray(),
-  checkProductAndImageLimit,
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
   processAndUpload({ folder: "Products" }),
   uploadProductImages,
 );
@@ -58,7 +59,7 @@ router.delete(
   "/:productId/images/:imageId",
   isAuthenticated,
   validate(deleteProductImageValSchema),
-  checkProductAndImageLimit,
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
   deleteProductImage,
 );
 //upload pdf for product
@@ -67,7 +68,7 @@ router.post(
   isAuthenticated,
   validate(productIdValSchema),
   uploadSingleFile(),
-  checkProductAndImageLimit,
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
   processAndUpload({ folder: "Products" }),
   uploadProductFile,
 );
@@ -76,7 +77,7 @@ router.delete(
   "/:productId/pdf",
   isAuthenticated,
   validate(productIdValSchema),
-  checkProductAndImageLimit,
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
   deleteProductFile,
 );
 export default router;
