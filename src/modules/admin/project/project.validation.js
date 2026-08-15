@@ -102,3 +102,8 @@ export const updateProjectValSchema = Joi.object({
 export const projectIdValSchema = Joi.object({
   projectId: idRule,
 });
+
+export const deleteProjectImageValSchema = Joi.object({
+  projectId: idRule,
+  imageId: idRule,
+});

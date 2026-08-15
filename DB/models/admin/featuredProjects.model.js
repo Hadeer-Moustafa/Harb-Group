@@ -1,17 +1,17 @@
 import mongoose from "mongoose";
 
-const featuredProductSchema = new mongoose.Schema(
+const featuredProjectsSchema = new mongoose.Schema(
   {
-    productId: {
+    projectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "Projects",
       required: true,
     },
     displayOrder: { type: Number, required: true },
   },
   { timestamps: true },
 );
-export const featuredProducts = mongoose.model(
-  "featuredProducts",
-  featuredProductSchema,
+export const featuredProjects = mongoose.model(
+  "featuredProjects",
+  featuredProjectsSchema,
 );

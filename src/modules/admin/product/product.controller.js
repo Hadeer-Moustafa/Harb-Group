@@ -270,16 +270,17 @@ export const deleteProduct = catchError(async (req, res, next) => {
       invalidate: true,
     });
   }
-  const folderPath = `products/${productId}`;
+  if (project.images?.length > 0) {
+    const folderPath = `Products/${productId}`;
+    try {
+      await cloudinary.api.delete_resources_by_prefix(folderPath);
 
-  try {
-    await cloudinary.api.delete_resources_by_prefix(folderPath);
+      await cloudinary.api.delete_folder(folderPath);
 
-    await cloudinary.api.delete_folder(folderPath);
-
-    console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
-  } catch (error) {
-    console.error("Cloudinary Folder Delete Error:", error);
+      console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
+    } catch (error) {
+      console.error("Cloudinary Folder Delete Error:", error);
+    }
   }
   await product.deleteOne();
   return res.status(204).send();
