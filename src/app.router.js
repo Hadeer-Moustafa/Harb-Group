@@ -6,6 +6,7 @@ import authRouter from "./modules/admin/auth/auth.router.js";
 import categoryRouter from "./modules/admin/category/category.router.js";
 import productRouter from "./modules/admin/product/product.router.js";
 import serviceRouter from "./modules/admin/service/service.router.js";
+import projectRouter from "./modules/admin/project/project.router.js"
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
@@ -28,6 +29,8 @@ export const appRouter = (app, express) => {
   app.use("/api/v1/admin/products", productRouter);
   // service router
   app.use("/api/v1/admin/services", serviceRouter);
+  // project router
+   app.use("/api/v1/admin/projects", projectRouter);
   //not found route handler
   app.use(notFoundHandler);
   // Global error handling middleware

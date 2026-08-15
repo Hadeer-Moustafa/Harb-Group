@@ -130,7 +130,9 @@ export const refreshToken = catchError(async (req, res, next) => {
     _id: payload.id,
     refreshToken: refreshToken,
     isActive: true,
-  });
+  })
+    .select("_id email name role")
+    .lean();
   if (!admin) {
     res.clearCookie("refreshToken", cookieOptions);
     return next({

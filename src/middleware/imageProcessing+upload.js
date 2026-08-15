@@ -142,7 +142,11 @@ export const processAndUpload = (options = {}) => {
 
     //  PHASE 2: Upload to Cloudinary (Executed ONLY if all validations pass)
     const subFolder =
-      req.params.id || req.params.productId || req.params.serviceId || null;
+      req.params.id ||
+      req.params.productId ||
+      req.params.serviceId ||
+      req.params.projectId ||
+      null;
     const targetFolder = subFolder ? `${folder}/${subFolder}` : folder;
     const successfullyUploaded = [];
 
