@@ -69,15 +69,18 @@ export const deleteProjectImage = catchError(async (req, res, next) => {
       ],
     });
   }
-  if (ImageExist.public_id) {
-    cloudinary.uploader
-      .destroy(ImageExist.public_id, {
-        resource_type: "image",
-        invalidate: true,
-      })
-      .catch((err) =>
-        console.error("Cloudinary Image Delete Error:", err.message),
-      );
+  const imagePublicId = ImageExist.public_id;
+  if (imagePublicId) {
+    (async () => {
+      try {
+        await cloudinary.uploader.destroy(imagePublicId, {
+          resource_type: "image",
+          invalidate: true,
+        });
+      } catch (err) {
+        console.error("Cloudinary Image Delete Error:", err.message);
+      }
+    })();
   }
   project.images.pull({ _id: imageId });
   project.images.forEach((img, index) => {
