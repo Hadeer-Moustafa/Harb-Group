@@ -141,27 +141,15 @@ export const deleteService = catchError(async (req, res, next) => {
 
      const folderPath = `services/${serviceId}`;
   
-   try {
-    const subFolders = await cloudinary.api.sub_folders("services");
-    const isFolderExist = subFolders.folders.some(
-      (folder) => folder.name === serviceId
-    );
-
-    if (isFolderExist) {
+  (async () => {
+    try {
       await cloudinary.api.delete_resources_by_prefix(folderPath);
       await cloudinary.api.delete_folder(folderPath);
-
       console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
-    } else {
-      console.log(`Folder ${folderPath} does not exist on Cloudinary, skipping delete.`);
+    } catch (error) {
+      console.error("Cloudinary Folder Delete Error:", error.message || error);
     }
-  } catch (error) {
-    if (error.error?.http_code === 404 || error.http_code === 404) {
-      console.log("Parent or target folder not found on Cloudinary");
-    } else {
-      console.error("Cloudinary Folder Delete Error:", error);
-    }
-  }
+  })();
   
   await Services.findByIdAndDelete(serviceId);
    return res.status(204).send();
@@ -235,10 +223,18 @@ export const deleteServiceImage = catchError (async (req , res, next) => {
       ],
     });
   }
-  await cloudinary.uploader.destroy(service.image.public_id, {
-        resource_type: "image",
-        invalidate: true,
-      });
+ const imagePublicId = service.image.public_id;
+    (async () => {
+      try {
+        await cloudinary.uploader.destroy(imagePublicId, {
+          resource_type: "image",
+          invalidate: true,
+        });
+      } catch (err) {
+        console.error("Cloudinary Image Delete Error:", err.message);
+      }
+    })();
+  
       service.image = undefined;
       await service.save();
       return res.status(204).send();

@@ -264,24 +264,28 @@ export const deleteProduct = catchError(async (req, res, next) => {
       ],
     });
   }
-  if (product.productPdf?.public_id) {
-    await cloudinary.uploader.destroy(product.productPdf.public_id, {
-      resource_type: "raw",
-      invalidate: true,
-    });
-  }
-  if (project.images?.length > 0) {
-    const folderPath = `Products/${productId}`;
+   const folderPath = `Products/${productId}`;
+   const pdfPublicId = product.productPdf?.public_id;
+   const hasImages = Boolean(product.images?.length > 0)
+ (async () => {
     try {
-      await cloudinary.api.delete_resources_by_prefix(folderPath);
+      if (pdfPublicId) {
+        await cloudinary.uploader.destroy(pdfPublicId, {
+          resource_type: "raw",
+          invalidate: true,
+        });
+      }
 
-      await cloudinary.api.delete_folder(folderPath);
-
-      console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
+      if (hasImages) {
+       
+        await cloudinary.api.delete_resources_by_prefix(folderPath);
+        await cloudinary.api.delete_folder(folderPath);
+        console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
+      }
     } catch (error) {
       console.error("Cloudinary Folder Delete Error:", error);
     }
-  }
+  })();
   await product.deleteOne();
   return res.status(204).send();
 });
@@ -304,11 +308,11 @@ export const uploadProductImages = catchError(async (req, res, next) => {
 export const deleteProductImage = catchError(async (req, res, next) => {
   const product = req.product;
   const { imageId } = req.params;
-  const ImageExist = product.images.filter(
+  const ImageExist = product.images.find(
     (img) => img._id.toString() === imageId,
   );
 
-  if (ImageExist.length === 0) {
+  if (!ImageExist) {
     return next({
       statusCode: 404,
       message: "Image not found",
@@ -334,10 +338,19 @@ export const deleteProductImage = catchError(async (req, res, next) => {
       ],
     });
   }
-  await cloudinary.uploader.destroy(ImageExist[0].public_id, {
-    resource_type: "image",
-    invalidate: true,
-  });
+  if (ImageExist.public_id) {
+    const imagePublic_id = ImageExist.public_id;
+    (async () => {
+      try {
+        await cloudinary.uploader.destroy(imagePublic_id, {
+          resource_type: "image",
+          invalidate: true,
+        });
+      } catch (err) {
+        console.error("Cloudinary Image Delete Error:", err.message);
+      }
+    })();
+  }
   product.images.pull({ _id: imageId });
   product.images.forEach((img, index) => {
     img.displayOrder = index + 1;
@@ -369,7 +382,7 @@ export const uploadProductFile = catchError(async (req, res, next) => {
 export const deleteProductFile = catchError(async (req, res, next) => {
   const product = req.product;
 
-  if (!product.productPdf.public_id) {
+  if (!product.productPdf?.public_id) {
     return next({
       statusCode: 404,
       message: "Pdf not found",
@@ -382,11 +395,18 @@ export const deleteProductFile = catchError(async (req, res, next) => {
       ],
     });
   }
-  //remove file from cloudinary
-  await cloudinary.uploader.destroy(product.productPdf.public_id, {
-    resource_type: "raw",
-    invalidate: true,
-  });
+  const pdfPublicId = product.productPdf.public_id;
+   (async () => {
+      try {
+        await cloudinary.uploader.destroy(pdfPublicId, {
+          resource_type: "raw",
+          invalidate: true,
+        });
+      } catch (err) {
+        console.error("Cloudinary pdf Delete Error:", err.message);
+      }
+    })();
+  
   product.productPdf = undefined;
   await product.save();
   return res.status(204).send();
