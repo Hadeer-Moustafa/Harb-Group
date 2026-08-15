@@ -266,7 +266,7 @@ export const deleteProduct = catchError(async (req, res, next) => {
   }
    const folderPath = `Products/${productId}`;
    const pdfPublicId = product.productPdf?.public_id;
-   const hasImages = Boolean(product.images?.length > 0)
+   const hasImages = (product.images?.length || 0) > 0;
  (async () => {
     try {
       if (pdfPublicId) {
