@@ -1,5 +1,6 @@
 import mongoose from "mongoose" ;
 import {seedDefaultAdmin} from "../src/utils/seedAdmin.js";
+import { seedCompanyInfo } from "../src/utils/seedCompanyInfo.js";
 
 let isConnected = false;
 
@@ -19,6 +20,7 @@ export const connectDB = async () => {
 
     
     await seedDefaultAdmin();
+    await seedCompanyInfo();
 
   } catch (error) {
     console.error(`MongoDB Connection Error: ${error.message}`);
