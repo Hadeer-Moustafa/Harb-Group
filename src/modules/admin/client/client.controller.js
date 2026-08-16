@@ -5,14 +5,12 @@ import { sendSuccess } from "../../../utils/successResponse.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const addClient = catchError(async (req, res, next) => {
-  const { nameAr, nameEn } = req.body;
+  const { name} = req.body;
   let displayOrder = req.body.displayOrder;
   const client = await Clients.findOne({
-    $or: [{ nameAr }, { nameEn }],
+   name,
     isActive: true,
   });
-  const isDuplicateAr = client?.nameAr === nameAr;
-  const duplicateField = isDuplicateAr ? "nameAr" : "nameEn";
   if (client) {
     return next({
       statusCode: 422,
@@ -21,10 +19,8 @@ export const addClient = catchError(async (req, res, next) => {
         {
           code: "DUPLICATE_NAME",
           message: "client with this name already exists",
-          field: duplicateField,
-          details: isDuplicateAr
-            ? "A client with this Arabic name already exists"
-            : "A client with this English name already exists",
+          field: "name",
+          details:"A client with this name already exists"
         },
       ],
     });
@@ -43,8 +39,7 @@ export const addClient = catchError(async (req, res, next) => {
       lastClient && lastClient.displayOrder ? lastClient.displayOrder + 1 : 1;
   }
   const newClient = await Clients.create({
-    nameAr,
-    nameEn,
+    name,
     displayOrder,
   });
   return sendSuccess(res, 201, "Client created successfully", newClient);

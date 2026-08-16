@@ -2,11 +2,7 @@ import mongoose from "mongoose";
 
 const clientSchema = new mongoose.Schema(
   {
-    nameAr: {
-      type: String,
-      require: true,
-    },
-    nameEn: {
+    name: {
       type: String,
       require: true,
     },
