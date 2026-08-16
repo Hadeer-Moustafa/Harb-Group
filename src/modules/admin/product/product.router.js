@@ -50,7 +50,7 @@ router.post(
   isAuthenticated,
   validate(productIdValSchema),
   uploadImagesArray(),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
+  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId",maxImages:20}),
   processAndUpload({ folder: "Products" }),
   uploadProductImages,
 );

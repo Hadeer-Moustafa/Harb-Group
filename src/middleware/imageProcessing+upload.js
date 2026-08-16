@@ -146,6 +146,7 @@ export const processAndUpload = (options = {}) => {
       req.params.productId ||
       req.params.serviceId ||
       req.params.projectId ||
+      req.params.clientId ||
       null;
     const targetFolder = subFolder ? `${folder}/${subFolder}` : folder;
     const successfullyUploaded = [];
