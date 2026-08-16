@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const phoneRegex = /^\+?[0-9]{7,15}$/;
+const phoneRegex = /^\+?(?:[ ]*\d){7,15}[ ]*$/;
 // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/;
 
 export const loginValidationSchema = Joi.object({
