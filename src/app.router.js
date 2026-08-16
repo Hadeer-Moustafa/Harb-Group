@@ -8,7 +8,8 @@ import productRouter from "./modules/admin/product/product.router.js";
 import serviceRouter from "./modules/admin/service/service.router.js";
 import projectRouter from "./modules/admin/project/project.router.js";
 import clientRouter from "./modules/admin/client/client.router.js";
-import companyRouter from "./modules/admin/company info/company.router.js"
+import companyRouter from "./modules/admin/company info/company.router.js";
+import homePageRouter from "./modules/admin/home page/homepage.router.js";
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
@@ -36,7 +37,9 @@ export const appRouter = (app, express) => {
   // client router
   app.use("/api/v1/admin/clients", clientRouter);
   // company info router
-  app.use("/api/v1/admin/company-info" , companyRouter );
+  app.use("/api/v1/admin/company-info", companyRouter);
+  // homePage router
+  app.use("/api/v1/admin/homepage", homePageRouter);
   //not found route handler
   app.use(notFoundHandler);
   // Global error handling middleware
