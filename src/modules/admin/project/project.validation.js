@@ -48,6 +48,7 @@ export const createProjectValSchema = Joi.object({
     "string.min": "client name must be at least 3 character",
   }),
   isfeature: Joi.boolean().default(false),
+  isActive: Joi.boolean().default(true),
 });
 
 export const updateProjectValSchema = Joi.object({

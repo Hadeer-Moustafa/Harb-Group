@@ -13,9 +13,13 @@ export const createProject = catchError(async (req, res, next) => {
 
 export const updateProject = catchError(async (req, res, next) => {
   const { projectId } = req.params;
-  const updatedProject = await Projects.findByIdAndUpdate(projectId, {
-    $set: req.body,
-  });
+  const updatedProject = await Projects.findByIdAndUpdate(
+    projectId,
+    {
+      $set: req.body,
+    },
+    { returnDocument: "after", runValidators: true },
+  );
   if (!updatedProject) {
     return next({
       statusCode: 404,
