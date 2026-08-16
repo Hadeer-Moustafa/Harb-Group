@@ -4,11 +4,11 @@ const projectSchema = new mongoose.Schema(
   {
     nameAr: {
       type: String,
-      require:true
+      require: true,
     },
     nameEn: {
       type: String,
-      require:true
+      require: true,
     },
     descriptionAr: {
       type: String,
@@ -18,17 +18,20 @@ const projectSchema = new mongoose.Schema(
     },
     completionYear: {
       type: Number,
-      require:true,
+      require: true,
       validate: {
-    validator: function(v) {
-      return Number.isInteger(v) && v >= 1900 && v <= new Date().getFullYear();
-    },
-    message: props => `${props.value} is not a valid year! Must be between 1900 and ${new Date().getFullYear()}`
-  }
+        validator: function (v) {
+          return (
+            Number.isInteger(v) && v >= 1900 && v <= new Date().getFullYear()
+          );
+        },
+        message: (props) =>
+          `${props.value} is not a valid year! Must be between 1900 and ${new Date().getFullYear()}`,
+      },
     },
     clientName: {
       type: String,
-      require:true
+      require: true,
     },
     images: [
       {
@@ -39,7 +42,7 @@ const projectSchema = new mongoose.Schema(
     ],
     isFeatured: {
       type: Boolean,
-      default:false
+      default: false,
     },
     isActive: {
       type: Boolean,
@@ -49,4 +52,4 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Projects = mongoose.model("projects", projectSchema);
+export const Projects = mongoose.model("Projects", projectSchema);

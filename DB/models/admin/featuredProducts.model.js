@@ -4,7 +4,7 @@ const featuredProductSchema = new mongoose.Schema(
   {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "Products",
       required: true,
     },
     displayOrder: { type: Number, required: true },
