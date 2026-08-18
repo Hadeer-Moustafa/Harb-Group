@@ -10,6 +10,8 @@ import projectRouter from "./modules/admin/project/project.router.js";
 import clientRouter from "./modules/admin/client/client.router.js";
 import companyRouter from "./modules/admin/company info/company.router.js";
 import homePageRouter from "./modules/admin/home page/homepage.router.js";
+import contactUsAdminRouter from "./modules/admin/contact us/contact.router.js"
+import contactUsPublicRouter from "./modules/public/contactUs/contactUs.router.js"
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
@@ -24,6 +26,9 @@ export const appRouter = (app, express) => {
   });
   // Middleware to parse cookies
   app.use(cookieParser());
+
+  // admin routers 
+
   // user routes
   app.use("/api/v1/auth", authRouter);
   // category router
@@ -40,6 +45,15 @@ export const appRouter = (app, express) => {
   app.use("/api/v1/admin/company-info", companyRouter);
   // homePage router
   app.use("/api/v1/admin/homepage", homePageRouter);
+// contact us
+app.use("/api/v1/admin/contact-messages",contactUsAdminRouter)
+
+
+  // public routers
+
+  // contact us public router
+app.use("/api/v1/contact" , contactUsPublicRouter);
+
   //not found route handler
   app.use(notFoundHandler);
   // Global error handling middleware
