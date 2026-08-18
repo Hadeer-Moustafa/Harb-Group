@@ -11,6 +11,7 @@ import clientRouter from "./modules/admin/client/client.router.js";
 import companyRouter from "./modules/admin/company info/company.router.js";
 import homePageRouter from "./modules/admin/home page/homepage.router.js";
 import contactUsAdminRouter from "./modules/admin/contact us/contact.router.js"
+import statisticRouter from "./modules/admin/Dashboard Statistics/statistics.router.js"
 import contactUsPublicRouter from "./modules/public/contactUs/contactUs.router.js"
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
@@ -46,7 +47,9 @@ export const appRouter = (app, express) => {
   // homePage router
   app.use("/api/v1/admin/homepage", homePageRouter);
 // contact us
-app.use("/api/v1/admin/contact-messages",contactUsAdminRouter)
+app.use("/api/v1/admin/contact-messages",contactUsAdminRouter);
+//Dashboard Statistics
+app.use("/api/v1/admin/dashboard", statisticRouter)
 
 
   // public routers
