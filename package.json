@@ -19,7 +19,6 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "html-encoding-sniffer": "^3.0.0",
-    "isomorphic-dompurify": "^3.19.0",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1",
