@@ -89,7 +89,17 @@ export const updateProductValSchema = Joi.object({
 export const productIdValSchema = Joi.object({
   productId: idRule,
 });
+
 export const deleteProductImageValSchema = Joi.object({
   productId: idRule,
   imageId: idRule,
+});
+
+export const gatAllProductsValSchema = Joi.object({
+  pageNumber: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).max(100).default(20),
+  search: Joi.string().trim().optional().allow(""),
+  categoryId: Joi.string().trim().hex().length(24).optional().messages({
+    "string.pattern.base": "Invalid category ID format",
+  }),
 });

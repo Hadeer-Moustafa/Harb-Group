@@ -5,10 +5,10 @@ import { sendSuccess } from "../../../utils/successResponse.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const addClient = catchError(async (req, res, next) => {
-  const { name} = req.body;
+  const { name } = req.body;
   let displayOrder = req.body.displayOrder;
   const client = await Clients.findOne({
-   name,
+    name,
     isActive: true,
   });
   if (client) {
@@ -20,7 +20,7 @@ export const addClient = catchError(async (req, res, next) => {
           code: "DUPLICATE_NAME",
           message: "client with this name already exists",
           field: "name",
-          details:"A client with this name already exists"
+          details: "A client with this name already exists",
         },
       ],
     });
@@ -135,4 +135,38 @@ export const deleteClient = catchError(async (req, res, next) => {
 
   await Clients.findByIdAndDelete(client._id);
   return res.status(204).send();
+});
+
+export const getAllClients = catchError(async (req, res, next) => {
+  const { search } = req.query;
+  const pageNumber = Number(req.query.pageNumber) || 1;
+  const pageSize = Number(req.query.pageSize) || 20;
+
+  const filter = {};
+
+  if (search && search.trim() !== "") {
+    const searchRegex = new RegExp(search.trim(), "i");
+    filter.name = searchRegex;
+  }
+  const skip = (pageNumber - 1) * pageSize;
+  const [clients, totalCount] = await Promise.all([
+    Clients.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .select("_id name logo.url isActive "),
+    Clients.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  return sendSuccess(res, 200, "Clients retrieved successfully", {
+    clients,
+    pagination: {
+      currentPage: pageNumber,
+      totalCount,
+      totalPages,
+      hasNextPage: pageNumber < totalPages,
+      hasPreviousPage: pageNumber > 1,
+    },
+  });
 });

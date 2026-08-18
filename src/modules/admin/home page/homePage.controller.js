@@ -230,6 +230,9 @@ export const setFeaturedProjects = catchError(async (req, res, next) => {
     await featuredProjects.deleteMany({}, { session });
     await featuredProjects.insertMany(documentsToInsert, { session });
 
+    await Projects.updateMany({ isFeatured: true }, { isFeatured: false }, { session });
+    await Projects.updateMany({ _id: { $in: extractedIds } }, { isFeatured: true }, { session });
+    
     await session.commitTransaction();
   } catch (error) {
     if (session.inTransaction()) {

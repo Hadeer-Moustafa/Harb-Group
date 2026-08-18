@@ -6,11 +6,14 @@ import {
   updateCategoryValSchema,
 } from "./category.validation.js";
 import { validate } from "../../../middleware/validate.schema.js";
+import { QueryValSchema} from "../../../utils/general.validation.js"
 import {
   createCategory,
   deleteCategory,
   updateCategory,
+  getAllCategories
 } from "./category.controller.js";
+
 
 const router = Router();
 
@@ -37,4 +40,6 @@ router.delete(
   validate(IDvalidationSchema),
   deleteCategory,
 );
+// get categories
+router.get ("/",isAuthenticated,validate(QueryValSchema),getAllCategories);
 export default router;

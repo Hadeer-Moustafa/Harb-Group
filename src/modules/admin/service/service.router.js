@@ -12,7 +12,9 @@ import {
   deleteService,
   upload_updateServiceImage,
   deleteServiceImage,
+  getAllServices,
 } from "./service.controller.js";
+import { QueryValSchema } from "../../../utils/general.validation.js";
 import { uploadImagesArray } from "../../../middleware/multer.js";
 import { processAndUpload } from "../../../middleware/imageProcessing+upload.js";
 const router = Router();
@@ -54,4 +56,11 @@ router.delete(
   validate(serviceIdValSchema),
   deleteServiceImage,
 );
+// get all services
+router.get(
+   "/",
+   isAuthenticated, 
+   validate(QueryValSchema), 
+   getAllServices
+  );
 export default router;

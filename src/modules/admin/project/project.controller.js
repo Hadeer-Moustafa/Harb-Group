@@ -129,3 +129,43 @@ export const deleteProject = catchError(async (req, res, next) => {
   await project.deleteOne();
   return res.status(204).send();
 });
+
+export const getAllProjects = catchError(async (req, res, next) => {
+  const { search } = req.query;
+  const pageNumber = Number(req.query.pageNumber) || 1;
+  const pageSize = Number(req.query.pageSize) || 20;
+
+  const filter = {};
+
+  if (search && search.trim() !== "") {
+    const searchRegex = new RegExp(search.trim(), "i");
+    filter.$or = [
+      { nameAr: searchRegex },
+      { nameEn: searchRegex },
+      { clientName: searchRegex },
+    ];
+  }
+  const skip = (pageNumber - 1) * pageSize;
+  const [projects, totalCount] = await Promise.all([
+    Projects.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .select(
+        "_id nameAr nameEn images.url clientName isFeatured isActive completionYear",
+      ),
+    Projects.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  return sendSuccess(res, 200, "Projects retrieved successfully", {
+    projects,
+    pagination: {
+      currentPage: pageNumber,
+      totalCount,
+      totalPages,
+      hasNextPage: pageNumber < totalPages,
+      hasPreviousPage: pageNumber > 1,
+    },
+  });
+});

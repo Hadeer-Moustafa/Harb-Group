@@ -12,11 +12,13 @@ import {
   uploadClientLogo,
   deleteClientLogo,
   deleteClient,
+  getAllClients
 } from "./client.controller.js";
 import { uploadImagesArray } from "../../../middleware/multer.js";
 import { processAndUpload } from "../../../middleware/imageProcessing+upload.js";
 import { checkDocAndImageLimit } from "../../../middleware/checkImageLimits.js";
 import { Clients } from "../../../../DB/models/admin/client.model.js";
+import { QueryValSchema } from "../../../utils/general.validation.js";
 const router = Router();
 // add client
 router.post("/", isAuthenticated, validate(addClientValSchema), addClient);
@@ -64,5 +66,12 @@ router.delete(
     paramName: "clientId",
   }),
   deleteClient,
+);
+// get all clients
+router.get(
+  "/",
+  isAuthenticated,
+  validate(QueryValSchema),
+  getAllClients
 );
 export default router;
