@@ -1,7 +1,7 @@
 import { catchError } from "../../../utils/catchError.js";
 import { Services } from "../../../../DB/models/admin/service.model.js";
 import { sendSuccess } from "../../../utils/successResponse.js";
-import {v2 as cloudinary} from "cloudinary"
+import { v2 as cloudinary } from "cloudinary";
 export const createService = catchError(async (req, res, next) => {
   const { nameAr, nameEn, descriptionAr, descriptionEn } = req.body;
   let displayOrder = req.body.displayOrder;
@@ -139,8 +139,8 @@ export const deleteService = catchError(async (req, res, next) => {
     });
   }
 
-     const folderPath = `services/${serviceId}`;
-  
+  const folderPath = `services/${serviceId}`;
+
   (async () => {
     try {
       await cloudinary.api.delete_resources_by_prefix(folderPath);
@@ -150,9 +150,9 @@ export const deleteService = catchError(async (req, res, next) => {
       console.error("Cloudinary Folder Delete Error:", error.message || error);
     }
   })();
-  
+
   await Services.findByIdAndDelete(serviceId);
-   return res.status(204).send();
+  return res.status(204).send();
 });
 
 export const upload_updateServiceImage = catchError(async (req, res, next) => {
@@ -193,8 +193,8 @@ export const upload_updateServiceImage = catchError(async (req, res, next) => {
   );
 });
 
-export const deleteServiceImage = catchError (async (req , res, next) => {
-    const { serviceId } = req.params;
+export const deleteServiceImage = catchError(async (req, res, next) => {
+  const { serviceId } = req.params;
   const service = await Services.findById(serviceId);
   if (!service) {
     return next({
@@ -210,8 +210,8 @@ export const deleteServiceImage = catchError (async (req , res, next) => {
       ],
     });
   }
-  if(!service.image?.public_id) {
-      return next({
+  if (!service.image?.public_id) {
+    return next({
       statusCode: 404,
       message: "image not found",
       errors: [
@@ -223,19 +223,53 @@ export const deleteServiceImage = catchError (async (req , res, next) => {
       ],
     });
   }
- const imagePublicId = service.image.public_id;
-    (async () => {
-      try {
-        await cloudinary.uploader.destroy(imagePublicId, {
-          resource_type: "image",
-          invalidate: true,
-        });
-      } catch (err) {
-        console.error("Cloudinary Image Delete Error:", err.message);
-      }
-    })();
-  
-      service.image = undefined;
-      await service.save();
-      return res.status(204).send();
-})
+  const imagePublicId = service.image.public_id;
+  (async () => {
+    try {
+      await cloudinary.uploader.destroy(imagePublicId, {
+        resource_type: "image",
+        invalidate: true,
+      });
+    } catch (err) {
+      console.error("Cloudinary Image Delete Error:", err.message);
+    }
+  })();
+
+  service.image = undefined;
+  await service.save();
+  return res.status(204).send();
+});
+
+export const getAllServices = catchError(async (req, res, next) => {
+  const { search } = req.query;
+  const pageNumber = Number(req.query.pageNumber) || 1;
+  const pageSize = Number(req.query.pageSize) || 20;
+
+  const filter = {};
+
+  if (search && search.trim() !== "") {
+    const searchRegex = new RegExp(search.trim(), "i");
+    filter.$or = [{ nameAr: searchRegex }, { nameEn: searchRegex }];
+  }
+  const skip = (pageNumber - 1) * pageSize;
+  const [services, totalCount] = await Promise.all([
+    Services.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .select("_id nameAr nameEn image.url displayOrder isActive"),
+    Services.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  return sendSuccess(res, 200, "Services retrieved successfully", {
+    services,
+    pagination: {
+      currentPage: pageNumber,
+      totalCount,
+      totalPages,
+      hasNextPage: pageNumber < totalPages,
+      hasPreviousPage: pageNumber > 1,
+    },
+  });
+});

@@ -6,6 +6,7 @@ import {
   updateProductValSchema,
   deleteProductImageValSchema,
   productIdValSchema,
+  gatAllProductsValSchema,
 } from "./product.validation.js";
 import {
   addProduct,
@@ -15,6 +16,7 @@ import {
   uploadProductFile,
   deleteProductFile,
   deleteProductImage,
+  getAllProducts,
 } from "./product.controller.js";
 import { Products } from "../../../../DB/models/admin/product.model.js";
 import { IDvalidationSchema } from "../category/category.validation.js";
@@ -41,7 +43,11 @@ router.delete(
   "/:productId",
   isAuthenticated,
   validate(productIdValSchema),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
+  checkDocAndImageLimit({
+    model: Products,
+    resourceName: "product",
+    paramName: "productId",
+  }),
   deleteProduct,
 );
 //upload images of products
@@ -50,7 +56,12 @@ router.post(
   isAuthenticated,
   validate(productIdValSchema),
   uploadImagesArray(),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId",maxImages:20}),
+  checkDocAndImageLimit({
+    model: Products,
+    resourceName: "product",
+    paramName: "productId",
+    maxImages: 20,
+  }),
   processAndUpload({ folder: "Products" }),
   uploadProductImages,
 );
@@ -59,7 +70,11 @@ router.delete(
   "/:productId/images/:imageId",
   isAuthenticated,
   validate(deleteProductImageValSchema),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
+  checkDocAndImageLimit({
+    model: Products,
+    resourceName: "product",
+    paramName: "productId",
+  }),
   deleteProductImage,
 );
 //upload pdf for product
@@ -68,7 +83,11 @@ router.post(
   isAuthenticated,
   validate(productIdValSchema),
   uploadSingleFile(),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
+  checkDocAndImageLimit({
+    model: Products,
+    resourceName: "product",
+    paramName: "productId",
+  }),
   processAndUpload({ folder: "Products" }),
   uploadProductFile,
 );
@@ -77,7 +96,18 @@ router.delete(
   "/:productId/pdf",
   isAuthenticated,
   validate(productIdValSchema),
-  checkDocAndImageLimit({model:Products,resourceName:"product",paramName:"productId"}),
+  checkDocAndImageLimit({
+    model: Products,
+    resourceName: "product",
+    paramName: "productId",
+  }),
   deleteProductFile,
+);
+//get all products
+router.get(
+  "/",
+  isAuthenticated,
+  validate(gatAllProductsValSchema),
+  getAllProducts,
 );
 export default router;

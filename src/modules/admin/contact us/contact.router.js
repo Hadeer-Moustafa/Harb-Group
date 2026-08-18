@@ -1,24 +1,17 @@
 import { Router } from "express";
 import { validate } from "../../../middleware/validate.schema.js";
 import { isAuthenticated } from "../../../middleware/isAuth.js";
-import {
-  getMessagesQuerySchema,
-  messageIdValSchema,
-} from "./contact.validation.js";
+import { messageIdValSchema } from "./contact.validation.js";
 import {
   getAllMessages,
   getMessageDetails,
   deleteMessage,
 } from "./contact.controller.js";
+import { QueryValSchema } from "../../../utils/general.validation.js";
 const router = Router();
 
 // get all messages
-router.get(
-  "/",
-  isAuthenticated,
-  validate(getMessagesQuerySchema),
-  getAllMessages,
-);
+router.get("/", isAuthenticated, validate(QueryValSchema), getAllMessages);
 //get message details
 router.get(
   "/:messageId",

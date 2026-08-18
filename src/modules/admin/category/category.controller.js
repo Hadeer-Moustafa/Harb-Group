@@ -152,3 +152,58 @@ export const deleteCategory = catchError(async (req, res, next) => {
   await category.save();
   return res.status(204).send();
 });
+
+export const getAllCategories = catchError(async (req, res, next) => {
+  const { search } = req.query;
+  const pageNumber = Number(req.query.pageNumber) || 1;
+  const pageSize = Number(req.query.pageSize) || 20;
+
+   const filter = {};
+ 
+   if (search && search.trim() !== "") {
+     const searchRegex = new RegExp(search.trim(), "i");
+     filter.$or = [
+       { nameAr: searchRegex },
+       { nameEn: searchRegex },
+     ];
+   }
+   filter.isActive = true;
+   const skip = (pageNumber - 1) * pageSize;
+  const [ categories , totalCount ] = await Promise.all([
+    Category.aggregate([
+    
+    { $match: filter },
+    {
+      $lookup: {
+        from: 'products',          
+        localField: '_id',         
+        foreignField: 'categoryId',  
+        as: 'productsList',        
+      },
+    },
+     {
+      $project: {
+        _id: 1,
+        nameEn: 1,
+        nameAr: 1,
+        productsCount: { $size: '$productsList' }, 
+        createdAt: 1,
+      },
+    },
+    { $sort: { createdAt: -1 } },
+    { $skip: skip },
+    { $limit: pageSize },
+  ]),
+  Category.countDocuments(filter)
+  ]) ;
+   const totalPages = Math.ceil(totalCount / pageSize);
+   return sendSuccess(res, 200, "Categories retrieved successfully", {
+    categories,
+    pagination: {
+      currentPage: pageNumber,
+      totalPages,
+       hasNextPage: pageNumber < totalPages,
+      hasPreviousPage: pageNumber > 1,
+    }
+  });
+});

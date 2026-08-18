@@ -13,11 +13,13 @@ import {
   uploadProjectImages,
   deleteProjectImage,
   deleteProject,
+  getAllProjects,
 } from "./project.controller.js";
 import { uploadImagesArray } from "../../../middleware/multer.js";
 import { processAndUpload } from "../../../middleware/imageProcessing+upload.js";
 import { checkDocAndImageLimit } from "../../../middleware/checkImageLimits.js";
 import { Projects } from "../../../../DB/models/admin/project.model.js";
+import { QueryValSchema } from "../../../utils/general.validation.js";
 const router = Router();
 //create project
 router.post(
@@ -71,5 +73,12 @@ router.delete(
     paramName: "projectId",
   }),
   deleteProject,
+);
+// get all projects
+router.get(
+  "/", 
+  isAuthenticated, 
+  validate(QueryValSchema), 
+  getAllProjects
 );
 export default router;

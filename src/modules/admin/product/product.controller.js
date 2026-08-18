@@ -264,10 +264,10 @@ export const deleteProduct = catchError(async (req, res, next) => {
       ],
     });
   }
-   const folderPath = `Products/${productId}`;
-   const pdfPublicId = product.productPdf?.public_id;
-   const hasImages = (product.images?.length || 0) > 0;
- (async () => {
+  const folderPath = `Products/${productId}`;
+  const pdfPublicId = product.productPdf?.public_id;
+  const hasImages = (product.images?.length || 0) > 0;
+  (async () => {
     try {
       if (pdfPublicId) {
         await cloudinary.uploader.destroy(pdfPublicId, {
@@ -277,10 +277,11 @@ export const deleteProduct = catchError(async (req, res, next) => {
       }
 
       if (hasImages) {
-       
         await cloudinary.api.delete_resources_by_prefix(folderPath);
         await cloudinary.api.delete_folder(folderPath);
-        console.log(`Folder ${folderPath} deleted successfully from Cloudinary`);
+        console.log(
+          `Folder ${folderPath} deleted successfully from Cloudinary`,
+        );
       }
     } catch (error) {
       console.error("Cloudinary Folder Delete Error:", error);
@@ -396,18 +397,65 @@ export const deleteProductFile = catchError(async (req, res, next) => {
     });
   }
   const pdfPublicId = product.productPdf.public_id;
-   (async () => {
-      try {
-        await cloudinary.uploader.destroy(pdfPublicId, {
-          resource_type: "raw",
-          invalidate: true,
-        });
-      } catch (err) {
-        console.error("Cloudinary pdf Delete Error:", err.message);
-      }
-    })();
-  
+  (async () => {
+    try {
+      await cloudinary.uploader.destroy(pdfPublicId, {
+        resource_type: "raw",
+        invalidate: true,
+      });
+    } catch (err) {
+      console.error("Cloudinary pdf Delete Error:", err.message);
+    }
+  })();
+
   product.productPdf = undefined;
   await product.save();
   return res.status(204).send();
+});
+
+export const getAllProducts = catchError(async (req, res, next) => {
+  const { search, categoryId } = req.query;
+  const pageNumber = Number(req.query.pageNumber) || 1;
+  const pageSize = Number(req.query.pageSize) || 20;
+
+  const filter = {};
+
+  if (categoryId && categoryId !== "all") {
+    filter.categoryId = categoryId;
+  }
+
+  if (search && search.trim() !== "") {
+    const searchRegex = new RegExp(search.trim(), "i");
+    filter.$or = [{ nameEn: searchRegex }, { nameAr: searchRegex }];
+  }
+
+  const skip = (pageNumber - 1) * pageSize;
+
+  const [products, totalCount] = await Promise.all([
+    Products.find(filter)
+      .populate("categoryId", "nameEn ")
+      .sort({ displayOrder: 1, createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .select(
+        "_id nameEn nameAr categoryId isAvailable order images.url displayOrder",
+      )
+      .lean(),
+
+    Products.countDocuments(filter),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+  return sendSuccess(res, 200, "Products retrieved successfully", {
+    products,
+    pagination: {
+      currentPage: pageNumber,
+      totalPages,
+      totalCount,
+      pageSize,
+      hasNextPage: pageNumber < totalPages,
+      hasPreviousPage: pageNumber > 1,
+    },
+  });
 });

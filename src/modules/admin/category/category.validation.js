@@ -87,3 +87,4 @@ export const updateCategoryValSchema = Joi.object({
       "any.required": "ID is required",
     }),
 }).required();
+
