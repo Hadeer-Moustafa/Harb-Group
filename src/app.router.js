@@ -16,6 +16,8 @@ import contactUsPublicRouter from "./modules/public/contactUs/contactUs.router.j
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
+// Essential for rate-limiting to block individual users instead of the entire proxy server
+  app.set("trust proxy", 1);
   // Middleware to parse JSON requests
   app.use(express.json());
   //cors middleware
