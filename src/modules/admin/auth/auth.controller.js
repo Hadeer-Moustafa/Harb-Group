@@ -6,6 +6,7 @@ import { catchError } from "../../../utils/catchError.js";
 import { sendSuccess } from "../../../utils/successResponse.js";
 import { generateAccessToken } from "../../../middleware/token.js";
 import { generateRefreshToken } from "../../../middleware/token.js";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
 const cookieOptions = {
   httpOnly: true,
@@ -13,17 +14,65 @@ const cookieOptions = {
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 };
 
+const loginFailureLimiter = new RateLimiterMemory({
+  points: 5,            
+  duration: 15 * 60,     
+  blockDuration: 15 * 60 
+});
+
 export const login = catchError(async (req, res, next) => {
   const { email, password } = req.body;
+  const limiterKey = `${req.ip}_${email}`;
+// Check if the user is currently blocked from previous failed attempts
+  const limiterRes = await loginFailureLimiter.get(limiterKey);
+
+  if (limiterRes !== null && limiterRes.consumedPoints >= 5) {
+    const retrySecs = Math.round(limiterRes.msBeforeNext / 1000) || 1;
+    res.set("Retry-After", String(retrySecs));
+
+    return next({
+      statusCode: 429,
+      message: "Too many failed attempts",
+      errors: [
+        {
+          code: "ACCOUNT_LOCKED_TEMPORARILY",
+          message: `Too many failed login attempts. Please try again after ${Math.ceil(retrySecs / 60)} minutes.`,
+          field: "email or password",
+        },
+      ],
+    });
+  }
+
   const admin = await AdminUser.findOne({
     email: email,
-    isActive: true,
   }).select("+passwordHash");
 
-  if (!admin) {
+  const handleAuthFailure = async () => {
+    try {
+      // Consume one failure point
+      await loginFailureLimiter.consume(limiterKey);
+    } catch (rlRejected) {
+      // 5th failed attempt reached; trigger temporary block
+      const retrySecs = Math.round(rlRejected.msBeforeNext / 1000) || 1;
+      res.set("Retry-After", String(retrySecs));
+
+      return next({
+        statusCode: 429,
+        message: "Too many failed attempts",
+        errors: [
+          {
+            code: "ACCOUNT_LOCKED_TEMPORARILY",
+            message: `Too many failed login attempts. Account locked for ${Math.ceil(retrySecs / 60)} minutes.`,
+            field: "email or password",
+          },
+        ],
+      });
+    }
+
+    // Remaining attempts available, but credentials are invalid
     return next({
       statusCode: 401,
-      message: "invalid credentials",
+      message: "Invalid credentials",
       errors: [
         {
           code: "INVALID_CREDENTIALS",
@@ -33,23 +82,33 @@ export const login = catchError(async (req, res, next) => {
         },
       ],
     });
+  };
+
+  if (!admin) {
+   return handleAuthFailure();
   }
 
   const isMatch = await bcrypt.compare(password, admin.passwordHash);
   if (!isMatch) {
+   return handleAuthFailure();
+  }
+
+  if(!admin.isActive){
     return next({
-      statusCode: 401,
-      message: "Invalid credentials",
+      statusCode: 403,
+      message: "Account is inactive",
       errors: [
         {
-          code: "INVALID_CREDENTIALS",
-          message: "Invalid credentials",
-          field: "email or password",
-          details: "The provided email or password is incorrect",
+          code: "ACCOUNT_INACTIVE",
+          message: "This account has been disabled",
+          details: "Contact system administrator for assistance",
         },
       ],
     });
   }
+
+  //Reset rate limiter counter on successful login
+  await loginFailureLimiter.delete(limiterKey);
 
   const accesstoken = generateAccessToken({
     id: admin._id,
@@ -64,6 +123,7 @@ export const login = catchError(async (req, res, next) => {
   //     userAgent: req.headers['user-agent'],
   //     expiresIn: "15m"
   // });
+  
   const refreshToken = generateRefreshToken({
     id: admin._id,
     email: admin.email,

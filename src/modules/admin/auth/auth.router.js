@@ -14,6 +14,7 @@ import {
   changePasswordValidationSchema,
 } from "./auth.validation.js";
 import { isAuthenticated } from "../../../middleware/isAuth.js";
+import { changePasswordLimiter , profileLimiter } from "../../../middleware/rateLimiter.js";
 const router = Router();
 
 //login route
@@ -23,7 +24,7 @@ router.post("/refresh-token", refreshToken);
 //logout route
 router.post("/logout", logout);
 //get admin profile route
-router.get("/profile", isAuthenticated, getAdminProfile);
+router.get("/profile", isAuthenticated , profileLimiter , getAdminProfile);
 // update admin profile
 router.put(
   "/profile",
@@ -35,6 +36,7 @@ router.put(
 router.post(
   "/change-password",
   isAuthenticated,
+  changePasswordLimiter ,
   validate(changePasswordValidationSchema),
   changePassword,
 );
