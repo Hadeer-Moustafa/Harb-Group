@@ -5,7 +5,7 @@ import { sendSuccess } from "../../../utils/successResponse.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const addClient = catchError(async (req, res, next) => {
-  const { name } = req.body;
+  const { name , isActive} = req.body;
   let displayOrder = req.body.displayOrder;
   const client = await Clients.findOne({
     name,
@@ -41,6 +41,7 @@ export const addClient = catchError(async (req, res, next) => {
   const newClient = await Clients.create({
     name,
     displayOrder,
+    isActive
   });
   return sendSuccess(res, 201, "Client created successfully", newClient);
 });
