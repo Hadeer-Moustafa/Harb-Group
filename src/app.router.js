@@ -13,6 +13,12 @@ import homePageRouter from "./modules/admin/home page/homepage.router.js";
 import contactUsAdminRouter from "./modules/admin/contact us/contact.router.js"
 import statisticRouter from "./modules/admin/Dashboard Statistics/statistics.router.js"
 import contactUsPublicRouter from "./modules/public/contactUs/contactUs.router.js"
+import servicePublicRouter from "./modules/public/services/services.public.router.js"
+import productsPublicRouter from "./modules/public/products/products.public.router.js"
+import projectsPublicRouter from "./modules/public/projects/project.public.router.js"
+import clientsPublicRouter from "./modules/public/client/client.public.router.js"
+import companyInfoPublicRouter from "./modules/public/company info/company.public.router.js"
+import HomePagePublicRouter from "./modules/public/Home Page/homePage.public.router.js"
 import cors from "cors";
 import { corsOptions } from "./utils/corsOptions.js";
 export const appRouter = (app, express) => {
@@ -58,6 +64,18 @@ app.use("/api/v1/admin/dashboard", statisticRouter)
 
   // contact us public router
 app.use("/api/v1/contact" , contactUsPublicRouter);
+// services public router
+app.use("/api/v1/services" , servicePublicRouter);
+// products public router
+app.use("/api/v1/products" , productsPublicRouter);
+// projects public router
+app.use("/api/v1/projects" , projectsPublicRouter);
+// clients public router
+app.use("/api/v1/clients" , clientsPublicRouter);
+// company information public router
+app.use("/api/v1/company-info" , companyInfoPublicRouter);
+// Home page public router
+app.use("/api/v1/homepage" , HomePagePublicRouter);
 
   //not found route handler
   app.use(notFoundHandler);
