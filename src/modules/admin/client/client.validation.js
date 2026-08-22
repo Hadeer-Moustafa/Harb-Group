@@ -14,6 +14,7 @@ export const addClientValSchema = Joi.object({
     "number.integer": "display order must be integer number",
     "number.positive": "display order must be positive number",
   }),
+   isActive: Joi.boolean().default(true),
 });
 
 export const updateClientValSchema = Joi.object({
