@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import cookieParser from "cookie-parser";
+import { visitorAnalyticsRouter } from "./modules/admin/visitors/analytics.visitor.router.js";
 import { globalErrorHandler } from "./middleware/globalErrorHandler.js";
 import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import authRouter from "./modules/admin/auth/auth.router.js";
@@ -36,6 +37,8 @@ export const appRouter = (app, express) => {
   // Middleware to parse cookies
   app.use(cookieParser());
 
+  // rest weekly visitors router
+  app.use("/api/v1/admin/analytics", visitorAnalyticsRouter);
   // admin routers 
 
   // user routes
